@@ -41,4 +41,6 @@ imem: Returns 16-bit instruction that is sent off to control unit when given the
 
 dmem: This is where memory is written. Utilized by sw and lw
 
+![image](https://github.com/cooper-union-ece-251-marano/final-project-ece-251-spring-2024-cpmoo/assets/162063986/a2b8d45b-4036-4922-80bb-4b0ccbf24220)
 
+To test the functionality of our CPU, we would run the fibonacci sequence based on the above except with the machine code on the right replaced with appropriate machine code as defined by our ISA>.
