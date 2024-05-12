@@ -41,4 +41,4 @@ imem: Returns 16-bit instruction that is sent off to control unit when given the
 
 dmem: This is where memory is written. Utilized by sw and lw
 
-When testing the computer in the testbench, we would expect to get fib(n) when inputing n. For example, fib(9)=34
+
