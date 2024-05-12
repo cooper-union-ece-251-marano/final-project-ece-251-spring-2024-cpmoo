@@ -10,56 +10,79 @@
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
-`ifndef TB_DMEM
-`define TB_DMEM
-
 `timescale 1ns/100ps
-`include "dmem.sv"
-`include "../clock/clock.sv"
 
-module tb_dmem;
-    parameter n = 32; // bit length of registers/memory
-    parameter r = 6; // we are only addressing 64=2**6 mem slots in imem
-    logic [(n-1):0] readdata, writedata;
-    logic [(n-1):0] dmem_addr;
-    logic write_enable;
-    logic clk, clock_enable;
+`include "./dmem.sv"
 
-   initial begin
-        $dumpfile("dmem.vcd");
-        $dumpvars(0, uut, uut1);
-        $monitor("time=%0t write_enable=%b dmem_addr=%h readdata=%h writedata=%h",
-            $realtime, write_enable, dmem_addr, readdata, writedata);
+module dmem_tb();
+    logic memWrite;
+    logic [15:0] address, writeData;
+
+    logic [15:0] readData;
+
+    reg clk, reset; //reset for initializing testvectors
+
+    logic [51:0] testvectors[0:1000];
+    logic [51:0] tmp;
+    integer vectornum, errors;
+    logic [15:0] expectedReadData;
+
+
+    dmem uut (
+             .clk(clk),
+             .memWrite(memWrite),
+             .address(address),
+             .writeData(writeData),
+             .readData(readData)
+    );
+
+    always begin
+        clk = 1;
+        #5;
+        clk = 0;
+        #5;
     end
 
     initial begin
-        #10 clock_enable <= 1;
-        #20 writedata = #(n)'hFFFFFFFF;
-        #20 dmem_addr <= #(r)'b000000;
-        #20 write_enable <= 1;
-        #20 write_enable <= 0;
-        #20 dmem_addr <= #(r)'b000001;
-        #20 writedata = #(n)'h0000FFFF;
-        #20 write_enable <= 1;
-        #20 write_enable <= 0;
-        #20 dmem_addr <= #(r)'b000010;
-        #20 writedata = #(n)'h00000000;
-        #20 write_enable <= 1;
-        #20 write_enable <= 0;
-        #20 $finish;
+        $dumpfile("dmem.vcd");
+        $dumpvars(0, uut);
     end
 
-   dmem uut(
-        .clk(clk),
-        .write_enable(write_enable),
-        .addr(dmem_addr),
-        .writedata(writedata),
-        .readdata(readdata)
-    );
-    clock uut1(
-        .ENABLE(clock_enable),
-        .CLOCK(clk)
-    );
+    initial begin
+        $readmemh("dmem_tb.tv", testvectors);
+        vectornum = 0;
+        errors = 0;
+        reset = 1; #27; reset = 0;
+    end
+
+    always @(negedge clk) begin
+        #1; tmp = testvectors[vectornum];
+
+        memWrite = tmp[48];
+        address = tmp[47:32];
+        writeData = tmp[31:16];
+
+        expectedReadData = tmp[15:0];
+
+    end
+
+    always @(posedge clk) begin
+        #1;
+        if (~reset) begin
+            if (readData !== expectedReadData) begin
+                $display("Error:\tinputs: memWrite = %b, address = %h, writeData = %h", memWrite, address, writeData);
+                $display("\treadData = %h, expectedReadData = %h", readData, expectedReadData);
+                errors = errors + 1;
+            end
+            vectornum = vectornum + 1;
+            if (testvectors[vectornum] === 52'hx) begin
+                $display("%d tests completed with %d errors", vectornum, errors);
+                $finish;
+            end
+        end
+    end
+
+
 endmodule
 
 `endif // TB_IMEM
