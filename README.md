@@ -4,42 +4,10 @@
 
 Special Thanks to Professor Marano for his guidance and support throughout the semester.
 
-In this project, we implemented a 16-bit RISC Single Cycle CPU. Our design is roughly based off of the Harris & Harris MIPS CPU
+### Description
 
+In this project, we implemented a 16-bit RISC Single Cycle CPU. This CPU has Von Neumann architecture and is implemented with verilog. The following components are utilized in the making of the CPU: adder,alu, aludec, clock, computer, controller, cpu, datapath, dff, dmem, imem, maindec, mux2, regfile, signext, and sl2.
 
-To do this the following components were implemented:
-
-adder
-
-alu
-
-aludec
-
-clock
-
-computer
-
-controller
-
-cpu
-
-datapath
-
-dff
-
-dmem
-
-imem
-
-maindec
-
-mux2
-
-regfile
-
-signext
-
-sl2
 
 ## Instruction Specs:
 
