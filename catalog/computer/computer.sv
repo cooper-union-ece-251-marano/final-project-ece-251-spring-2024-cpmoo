@@ -12,36 +12,40 @@
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef COMPUTER
 `define COMPUTER
-
 `timescale 1ns/100ps
 
 `include "../cpu/cpu.sv"
 `include "../imem/imem.sv"
 `include "../dmem/dmem.sv"
 
-module computer
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-    input  logic           clk, reset, 
-    output logic [(n-1):0] writedata, dataadr, 
-    output logic           memwrite
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
-    logic [(n-1):0] pc, instr, readdata;
+module computer (
+    input logic clk, rst,
+    output logic [15:0] writeData, address,
+    output logic memWrite
+    );
+    logic [15:0] instruction, readData, pc;
 
-    // computer internal components
-
-    // the RISC CPU
-    cpu mips(clk, reset, pc, instr, memwrite, dataadr, writedata, readdata);
-    // the instruction memory ("text segment") in main memory
-    imem imem(pc[7:2], instr);
-    // the data memory ("data segment") in main memory
-    dmem dmem(clk, memwrite, dataadr, writedata, readdata);
-
+    cpu moo(
+        clk,
+        rst,
+        instruction,
+        readData,
+        memWrite,
+        address,
+        writeData,
+        pc
+    );
+    imem imem(
+        pc[5:1],
+        instruction
+    );
+    dmem dmem(
+        clk,
+        memWrite,
+        address,
+        writeData,
+        readData
+    );
 endmodule
 
-`endif // COMPUTER
+`endif
