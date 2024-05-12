@@ -5,66 +5,57 @@
 // 
 //     Create Date: 2023-02-07
 //     Module Name: datapath
-//     Description: 32-bit RISC-based CPU datapath (MIPS)
+//     Description: 16-bit RISC-based CPU datapath (MIPS)
 //
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef DATAPATH
 `define DATAPATH
-
 `timescale 1ns/100ps
 
-`include "../regfile/regfile.sv"
-`include "../alu/alu.sv"
-`include "../dff/dff.sv"
-`include "../adder/adder.sv"
-`include "../sl2/sl2.sv"
+`include "../maindec/maindec.sv"
 `include "../mux2/mux2.sv"
+`include "../mux3/mux3.sv"
+`include "../adder/adder.sv"
+`include "../dff/dff.sv"
+`include "../alu/alu.sv"
 `include "../signext/signext.sv"
+`include "../sl1/sl1.sv"
+`include "../regfile/regfile.sv"
 
-module datapath
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-    input  logic        clk, reset,
-    input  logic        memtoreg, pcsrc,
-    input  logic        alusrc, regdst,
-    input  logic        regwrite, jump,
-    input  logic [2:0]  alucontrol,
-    output logic        zero,
-    output logic [(n-1):0] pc,
-    input  logic [(n-1):0] instr,
-    output logic [(n-1):0] aluout, writedata,
-    input  logic [(n-1):0] readdata
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
-    logic [4:0]  writereg;
-    logic [(n-1):0] pcnext, pcnextbr, pcplus4, pcbranch;
-    logic [(n-1):0] signimm, signimmsh;
-    logic [(n-1):0] srca, srcb;
-    logic [(n-1):0] result;
 
-    // "next PC" logic
-    dff #(n)    pcreg(clk, reset, pcnext, pc);
-    adder       pcadd1(pc, 32'b100, pcplus4);
-    sl2         immsh(signimm, signimmsh);
-    adder       pcadd2(pcplus4, signimmsh, pcbranch);
-    mux2 #(n)   pcbrmux(pcplus4, pcbranch, pcsrc, pcnextbr);
-    mux2 #(n)   pcmux(pcnextbr, {pcplus4[31:28], instr[25:0], 2'b00}, jump, pcnext);
+module datapath (
+    input logic clk, rst, rw, pcSrc,
+    input logic [1:0] rdst, mtr, jump, alusrc,
+    input logic [2:0] aluctrl,
 
-    // register file logic
-    regfile     rf(clk, regwrite, instr[25:21], instr[20:16], writereg, result, srca, writedata);
-    mux2 #(5)   wrmux(instr[20:16], instr[15:11], regdst, writereg);
-    mux2 #(n)   resmux(aluout, readdata, memtoreg, result);
-    signext     se(instr[15:0], signimm);
+    input logic [15:0] instr, rd,
 
-    // ALU logic
-    mux2 #(n)   srcbmux(writedata, signimm, alusrc, srcb);
-    alu         alu(clk, srca, srcb, alucontrol, aluout, zero);
+    output logic [15:0] alures, mwd, pc,
+    output logic zero
+    );
+
+    logic [15:0] pcNext, pcPlus2, pcBranch, pcBranchNext;
+    logic [15:0] signImmediate,signImmediateSHIFTED;
+
+    logic [3:0] wa;
+    logic [15:0] rwd;
+
+    logic [15:0] alu1, alu2;
+
+    dff pcReg(rst, clk, pcNext, pc);
+    adder add(pc, 16'b10, pcPlus2);
+    sl2 shImmediate(signImm, sign_shifted);
+    adder addAlu(pcPlus2,sign_shifted, pcBranch);
+    mux2 #(16) branchMux(pcPlus2, pcBranch, pcsrc, pcBranchNext);
+    mux2 #(16) pcMux(pcBranchNext, {pcPlus2[15:13], instr[11:0], 1'b0}, alu1, jump, pcNext);
+    mux2 #(4) waMux(instr[7:4], instr[3:0], 4'b1111, rdst, wa);
+    regfile rf(instr[11:8], instr[7:4], wa, rwd, rw, clk, alu1, mwd);
+    signext signext(instr[3:0], signImm);
+    mux2 #(16) memMux(alures, rd, pcPlus2, mtr, rwd);
+    mux2 #(16) alu2Mux(mwd,signImmed, {12'b0,instr[7:4]}, alusrc, alu2);
+    alu alu(alu1, alu2, aluctrl, alures, zero);
 
 endmodule
 
