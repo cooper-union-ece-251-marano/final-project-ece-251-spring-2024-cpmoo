@@ -50,12 +50,12 @@ module tb_cpu();
     end
 
     initial begin
-        $dumpfile("tb_cpu_cpu.vcd");
+        $dumpfile("tb_cpu.vcd");
         $dumpvars(0, uut);
     end
 
     initial begin
-        $readmemh("tb_cpu_tb.tv", testvectors);
+        $readmemh("tb_cpu.tv", testvectors);
         vectornum = 0;
         errors = 0;
         reset = 1; #27; reset = 0;
