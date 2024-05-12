@@ -22,7 +22,6 @@ module tb_alu();
 
     reg clk, rst;
 
-
     logic [55:0] test[0:32];
     logic [15:0] num, errors;
     logic [15:0] exp_res;
