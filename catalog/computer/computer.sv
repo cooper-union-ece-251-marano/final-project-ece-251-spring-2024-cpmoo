@@ -5,7 +5,7 @@
 // 
 //     Create Date: 2023-02-07
 //     Module Name: computer
-//     Description: 32-bit RISC
+//     Description: 16-bit RISC
 //
 // Revision: 1.0
 //
