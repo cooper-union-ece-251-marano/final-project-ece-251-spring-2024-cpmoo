@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 // The Cooper Union
 // ECE 251 Spring 2024
-// Engineer: YOUR NAMES
+// Engineer: Stephen Brockerhoff & Abduhla Ali
 // 
 //     Create Date: 2023-02-07
 //     Module Name: adder
@@ -12,20 +12,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef ADDER
 `define ADDER
-
 `timescale 1ns/100ps
 
-module adder
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
+module adder (
+	input logic [15:0] a, 
+	input logic [15:0] b, 
+    output logic [15:0] sum
+	);
+	
+	assign sum = a + b;
 
 endmodule
 
-`endif // ADDER
+`endif
