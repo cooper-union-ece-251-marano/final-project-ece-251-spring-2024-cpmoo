@@ -34,6 +34,9 @@ Our CPU has 16 instructions from the MIPS architecture set. The first 4 bits are
 ![image](https://github.com/cooper-union-ece-251-marano/final-project-ece-251-spring-2024-cpmoo/assets/162063986/d6d163c4-ee1d-4ca5-8fb2-70014f87a445)
 Tthe control signals control how information travels within the CPU depending on the opcode supplied to the controller.
 
-
+### Memory implementation
+memory is split into dmem and imem
+imem: Returns 16-bit instruction that is sent off to control unit when given the address specified by the PC
+dmem: This is where memory is written. Utilized by sw and lw
 
 When testing the computer in the testbench, we would expect to get fib(n) when inputing n. For example, fib(9)=34
