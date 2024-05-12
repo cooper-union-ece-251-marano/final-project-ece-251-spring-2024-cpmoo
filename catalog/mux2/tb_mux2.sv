@@ -10,46 +10,73 @@
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
-`ifndef TB_MUX2
-`define TB_MUX2
+`ifndef MUX2_TB
+`define MUX2_TB
 
 `timescale 1ns/100ps
-`include "mux2.sv"
-`include "../clock/clock.sv"
+`include "./mux2.sv"
 
-module tb_mux2;
-    parameter n = 32; // #bits for an operand
+module mux2_tb();
+    parameter n = 16;
     logic s;
-    logic [(n-1):0] d0, d1;
-    logic [(n-1):0] y;
-    wire clk;
-    logic enable;
+    logic [(n-1):0] a, b;
+    logic [(n-1):0] result;
 
+    reg clk;
 
-   initial begin
-        $dumpfile("mux2.vcd");
-        $dumpvars(0, uut0, uut1);
-        // $monitor("s = %0b d0 = (0x%0h)(%0d) d1 = (0x%0h)(%0d) y = (0x%0h)(%0d)", s, d0, d0, d1, d1, y, y);
-        $monitor("time=%0t \t enable=%0b s=%0b y=%h d0=%h d1=%h",$realtime, enable, s, y, d0, d1);
+    logic reset;
+    logic [51:0] testvectors[0:4];
+    logic [51:0] tmp;
+    logic [15:0] vectornum, errors;
+    logic [15:0] expectedResult;
+
+    mux2 uut (
+                .a(a),
+                .b(b),
+                .s(s),
+                .result(result)
+    );
+
+    always begin
+        clk = 1;
+        #5;
+        clk = 0;
+        #5;
     end
 
     initial begin
-        d0 <= #n'h80000000;
-        d1 <= #n'h00000001;
-        enable <= 0;
-        #10 enable <= 1;
-        #10 s <= 1'b0;
-        #20 s <= 1'b1;
-        #100 enable <= 0;
-        $finish;
+        $dumpfile("mux2.vcd");
+        $dumpvars(0, uut);
     end
 
-    mux2 uut0(
-        .S(s), .D0(d0), .D1(d1), .Y(y)
-    );
-    clock uut1(
-        .ENABLE(enable),
-        .CLOCK(clk)
-    );
+    initial begin
+        $readmemh("mux2_tb.tv", testvectors);
+        vectornum = 0;
+        errors = 0;
+        reset = 1; #27; reset = 0;
+    end
+
+    always @(negedge clk) begin
+        #1; tmp = testvectors[vectornum];
+        a = tmp[51:36];
+        b = tmp[35:20];
+        s = tmp[16];
+        expectedResult = tmp[15:0];
+    end
+
+    always @(posedge clk) begin
+        if (~reset) begin
+            if ({result} !== {expectedResult}) begin
+                $display("Error\tinputs: a = %h, b = %h, s = %h", a, b, s);
+                $display("\tresult = %h, expectedResult = %h", result, expectedResult);
+                errors = errors + 1;
+            end
+            vectornum = vectornum + 1;
+            if (testvectors[vectornum] === 52'hx) begin
+                $display("%d tests completed with %d errors", vectornum, errors);
+                $finish;
+            end
+        end
+    end
 endmodule
-`endif // TB_MUX2
+`endif //MUX2_TB
