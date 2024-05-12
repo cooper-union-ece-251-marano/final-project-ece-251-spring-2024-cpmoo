@@ -10,29 +10,69 @@
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
-`ifndef TB_SL2
-`define TB_SL2
-
 `timescale 1ns/100ps
-`include "sl2.sv"
 
-module tb_sl2;
-    parameter n = 32;
-    logic [(n-1):0] a, y;
+`include "./sl2.sv"
 
-   initial begin
-        $dumpfile("sl2.vcd");
-        $dumpvars(0, uut);
-        //$monitor("a = %0b (0x%0h)(%0d) y = %0b (0x%0h)(%0d) ", a, a, a, y, y, y);
-        $monitor("time=%0t \t a=%b y=%b",$realtime, a, y);
+module sl2_tb();
+    logic [15:0] in;
+    logic [15:0] out;
+
+    reg clk, reset; //reset for initializing testvectors
+
+    logic [31:0] testvectors[0:1000];
+    logic [31:0] tmp;
+    integer vectornum, errors;
+    logic [15:0] expectedOut;
+
+
+    sl2 uut (
+             .in(in),
+             .out(out)
+    );
+
+    always begin
+        clk = 1;
+        #5;
+        clk = 0;
+        #5;
     end
 
     initial begin
-        a <= #n'h0000000F;
+        $dumpfile("sl2.vcd");
+        $dumpvars(0, uut);
     end
 
-    sl2 uut(
-        .A(a), .Y(y)
-    );
+    initial begin
+        $readmemh("sl2_tb.tv", testvectors);
+        vectornum = 0;
+        errors = 0;
+        reset = 1; #27; reset = 0;
+    end
+
+    always @(posedge clk) begin
+        #1; tmp = testvectors[vectornum];
+
+        in = tmp[31:16];
+
+        expectedOut = tmp[15:0];
+    end
+
+    always @(negedge clk) begin
+        #1;
+        if (~reset) begin
+            if (out !== expectedOut) begin
+                $display("Error:\tinputs: in = %h", in);
+                $display("\tout = %h, expectedOut = %h", out, expectedOut);
+                errors = errors + 1;
+            end
+            vectornum = vectornum + 1;
+            if (testvectors[vectornum] === 32'hx) begin
+                $display("%d tests completed with %d errors", vectornum, errors);
+                $finish;
+            end
+        end
+    end
+
+
 endmodule
-`endif // TB_SL2

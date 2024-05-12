@@ -12,22 +12,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef MUX2
 `define MUX2
-
 `timescale 1ns/100ps
 
 module mux2
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-    input  logic [(n-1):0] D0, D1,
-    input  logic S,
-    output logic [(n-1):0] Y
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
-    assign Y = S ? D1 : D0;
+    #(parameter n = 16) (
+    input logic [(n-1):0] a, b,
+    input logic s,
+    output logic [(n-1):0] result
+    );
+
+    assign result = s ? b : a;
+
 endmodule
 
 `endif // MUX2

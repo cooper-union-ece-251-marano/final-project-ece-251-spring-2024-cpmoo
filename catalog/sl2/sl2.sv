@@ -12,21 +12,16 @@
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef SL2
 `define SL2
-
 `timescale 1ns/100ps
 
-module sl2
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-    input  logic [(n-1):0] A,
-    output logic [(n-1):0] Y
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
-    assign Y = {A[(n-3):0], 2'b00};
-endmodule
+module sl2 (
+	input logic [15:0] in,
+	output logic [15:0] out
+	);
 
-`endif // SL2
+	always @(*) begin
+		out <= in << 2;
+	end
+
+endmodule
+`endif

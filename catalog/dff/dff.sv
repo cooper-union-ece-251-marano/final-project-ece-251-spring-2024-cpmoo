@@ -5,39 +5,28 @@
 // 
 //     Create Date: 2023-02-07
 //     Module Name: dff
-//     Description: 32 bit D flip flop
+//     Description: 16 bit D flip flop
 //
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
 `ifndef DFF
 `define DFF
-
 `timescale 1ns/100ps
 
-module dff
-    #(parameter n = 32)(
-    //
-    // ---------------- PORT DEFINITIONS ----------------
-    //
-    input  logic CLOCK, RESET,
-    input  logic [(n-1):0] D,
-    output logic [(n-1):0] Q
-);
-    //
-    // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
-    //
-    always @(posedge CLOCK, posedge RESET)
-    begin
-        if (RESET)
-        begin
-            Q <= 0;
-        end
-        else
-        begin
-            Q <= D;
-        end
-    end
+module dff (
+	input logic, reset, clk, 
+	input logic [15:0] d,
+	output reg [15:0] q
+	);
+
+	always @(posedge clk, posedge reset) begin
+		if (reset)
+			q <= 15'b0;
+		else
+			q <= d;
+	end
+
 endmodule
 
-`endif // DFF
+`endif
