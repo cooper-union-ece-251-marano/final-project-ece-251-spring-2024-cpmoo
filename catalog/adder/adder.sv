@@ -17,10 +17,10 @@
 module adder (
 	input logic [15:0] a, 
 	input logic [15:0] b, 
-    output logic [15:0] sum
+	output logic [15:0] result
 	);
 	
-	assign sum = a + b;
+	assign result = a + b;
 
 endmodule
 
